@@ -41,13 +41,6 @@ cd tuff_virtual_machine
 
 #### Run
 
-PowerShell
-```powershell
-Set-Location path/to/local_repository_cloned
-cargo run -- -r path/to/your_rom_file.ch8
-```
-
-Bash / Command Prompt
 ```bash
 cd path/to/local_repository_cloned
 cargo run -- -r path/to/your_rom_file.ch8
@@ -57,13 +50,6 @@ cargo run -- -r path/to/your_rom_file.ch8
 
 For debug build:
 
-PowerShell
-```powershell
-Set-Location path/to/local_repository_cloned
-cargo build
-```
-
-Bash / Command Prompt
 ```bash
 cd path/to/local_repository_cloned
 cargo build
@@ -71,13 +57,6 @@ cargo build
 
 For optimized release build (much faster, recommended for regular use):
 
-PowerShell
-```powershell
-Set-Location path/to/local_repository_cloned
-cargo build --release
-```
-
-Bash / Command Prompt
 ```bash
 cd path/to/local_repository_cloned
 cargo build --release
@@ -102,7 +81,7 @@ cargo build --release
 
 ## Testing
 
-Tuff Virtual Machine passes the following Timendus test ROMs:
+Tuff Virtual Machine passes the following [Timendus test ROMs](https://github.com/Timendus/chip8-test-suite):
 
  - 1-chip8-logo.ch8
 
