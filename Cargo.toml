@@ -1,0 +1,15 @@
+[package]
+name = "tuff_virtual_machine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cpal = "0.18.1"
+minifb = "0.28.0"
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+strip = true
+opt-level = "z"
