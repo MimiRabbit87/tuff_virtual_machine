@@ -1,4 +1,4 @@
-[这里有中文版](https://github.com/MimiRabbit87/tuff_virtual_machine/README_zh-CN.md)
+[这里有中文版](https://github.com/MimiRabbit87/tuff_virtual_machine/blob/master/README_zh-CN.md)
 # Tuff Virtual Machine
 
 Tuff Virtual Machine is a Rust implement of the CHIP-8 interpreter.
@@ -104,4 +104,4 @@ Feel free to open issues or pull requests. Suggestions and improvements are welc
 
 ## License
 
-This project is licensed under the MIT License – see the [LICENSE](https://github.com/MimiRabbit87/tuff_virtual_machine/LICENSE) file for details.
+This project is licensed under the MIT License – see the [LICENSE](https://github.com/MimiRabbit87/tuff_virtual_machine/blob/master/LICENSE) file for details.
