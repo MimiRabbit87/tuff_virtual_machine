@@ -1,3 +1,4 @@
+[这里有中文版](https://github.com/MimiRabbit87/tuff_virtual_machine/README_zh-CN.md)
 # Tuff Virtual Machine
 
 Tuff Virtual Machine is a Rust implement of the CHIP-8 interpreter.
@@ -69,7 +70,7 @@ cargo build --release
 |`-r, --run <PATH>`|Path to the CHIP-8 ROM file to run|
 |`-f, --frequency <HZ>`|Set CPU frequency (in instructions per second). Default is `500`. Use `0` for unlimited (unstable)|
 |`-i, --with-debug-information`|Show debug information (registers, stack, timers) on the terminal|
-|`--no-vertical-synchronization`|Disable `60Hz` frame sync (may cause tearing or speed inconsistency)|
+|`--no-vertical-synchronization`|Disable `60Hz` frame sync (may cause rendering to be too fast)|
 |`-h, --help`|Print help message (use `--help` for detailed help)|
 |`-V, --version`|Print version information|
 
@@ -103,4 +104,4 @@ Feel free to open issues or pull requests. Suggestions and improvements are welc
 
 ## License
 
-This project is licensed under the MIT License – see the LICENSE file for details.
+This project is licensed under the MIT License – see the [LICENSE](https://github.com/MimiRabbit87/tuff_virtual_machine/LICENSE) file for details.
