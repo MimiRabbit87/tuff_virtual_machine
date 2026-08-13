@@ -6,7 +6,6 @@
 ## 什么是凝灰岩？
 
 凝灰岩是一个使用 Rust 编写的 CHIP-8 工具链套组，作为我的练手项目，而凝灰岩虚拟机是工具链的其中一个。
-Tuff is a collection of CHIP-8 toolchain projects, written in Rust, as my practice project. Tuff Virtual Machine is one of them.
 
 ## 实现
 
