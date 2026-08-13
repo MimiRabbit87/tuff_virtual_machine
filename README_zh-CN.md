@@ -1,4 +1,4 @@
-[Here's the English version](https://github.com/MimiRabbit87/tuff_virtual_machine/README.md)
+[Here's the English version](https://github.com/MimiRabbit87/tuff_virtual_machine/blob/master/README.md)
 # 凝灰岩虚拟机
 
 凝灰岩虚拟机是 CHIP-8 解释器的一个 Rust 实现。
@@ -105,4 +105,4 @@ cargo build --release
 
 ## 开源协议
 
-本项目以 MIT 协议开源，查看 [LICENSE](https://github.com/MimiRabbit87/tuff_virtual_machine/LICENSE) 文件获取更多细节。
+本项目以 MIT 协议开源，查看 [LICENSE](https://github.com/MimiRabbit87/tuff_virtual_machine/blob/masterLICENSE) 文件获取更多细节。
