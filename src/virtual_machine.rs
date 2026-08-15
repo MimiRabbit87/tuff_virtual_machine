@@ -9,12 +9,13 @@ use std::{
 };
 
 use cpal::{
-    Device, Host, Stream, SupportedStreamConfig,
+    Device, Host, Stream,
     traits::{DeviceTrait, HostTrait, StreamTrait},
 };
 
 use crate::{
     instruction::Opcode, memory::RAM, random::TinyMT8Bit, screen::Screen, spin_sleep::sleep,
+    stderr_silencer::with_stderr_silenced,
 };
 
 const FREQUENCY_60HZ: Duration = Duration::from_nanos(1_000_000_000 / 60);
@@ -114,53 +115,68 @@ impl Clock {
 }
 
 pub struct AudioPlayer {
-    _stream: Stream,
+    _stream: Option<Stream>,
     playing: Arc<Mutex<bool>>,
 }
 
 impl AudioPlayer {
     pub fn new() -> Self {
-        let host: Host = cpal::default_host();
-        let device: Device = host.default_output_device().expect("no output device");
-        let config: SupportedStreamConfig = device.default_output_config().unwrap();
-        let sample_rate: u32 = config.sample_rate();
-        let channels: u16 = config.channels();
-        let playing: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
-        let playing_clone: Arc<Mutex<bool>> = playing.clone();
+        let (stream_opt, playing) = with_stderr_silenced(|| {
+            let host: Host = cpal::default_host();
+            let device: Option<Device> = host.default_output_device();
+            let playing: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+            let playing_clone: Arc<Mutex<bool>> = playing.clone();
+            let mut _stream: Option<Stream> = None;
 
-        let _stream: Stream = device
-            .build_output_stream(
-                config.config(),
-                move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                    let play: bool = *playing_clone.lock().unwrap();
-                    if play {
-                        let phase_increment: f32 = 440.0 / sample_rate as f32;
-                        thread_local! {
-                            static PHASE: std::cell::RefCell<f32> = std::cell::RefCell::new(0.0);
-                        };
-                        PHASE.with(|phase_cell| {
-                            let mut phase: RefMut<'_, f32> = phase_cell.borrow_mut();
-                            for frame in data.chunks_mut(channels.into()) {
-                                let sample: f32 = (*phase * 2.0 * PI).sin() * 0.3;
+            if let Some(device_found) = device {
+                if let Ok(config) = device_found.default_output_config() {
+                    let sample_rate: u32 = config.sample_rate();
+                    let channels: u16 = config.channels();
+                    let stream: Stream = device_found
+                        .build_output_stream(
+                            config.config(),
+                            move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
+                                let play: bool = *playing_clone.lock().unwrap();
+                                if play {
+                                    let phase_increment: f32 = 440.0 / sample_rate as f32;
+                                    thread_local! {
+                                        static PHASE: std::cell::RefCell<f32> = std::cell::RefCell::new(0.0);
+                                    };
+                                    PHASE.with(|phase_cell| {
+                                        let mut phase: RefMut<'_, f32> = phase_cell.borrow_mut();
+                                        for frame in data.chunks_mut(channels.into()) {
+                                            let sample: f32 = (*phase * 2.0 * PI).sin() * 0.3;
+                                            *phase = (*phase + phase_increment) % 1.0;
+                                            for sample_out in frame.iter_mut() {
+                                                *sample_out = sample;
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    for sample in data.iter_mut() {
+                                        *sample = 0.0;
+                                    }
+                                };
+                            },
+                            |err| println!("audio error: {}", err),
+                            None,
+                        )
+                        .unwrap();
+                    stream.play().unwrap();
+                    _stream = Some(stream);
+                } else {
+                    println!("audio device not available");
+                };
+            } else {
+                println!("audio device not available");
+            };
+            (_stream, playing)
+        });
 
-                                *phase = (*phase + phase_increment) % 1.0;
-                                for sample_out in frame.iter_mut() {
-                                    *sample_out = sample;
-                                }
-                            }
-                        });
-                    } else {
-                        for sample in data.iter_mut() {
-                            *sample = 0.0;
-                        }
-                    };
-                },
-                |err| eprintln!("audio error: {}", err),
-                None,
-            )
-            .unwrap();
-        _stream.play().unwrap();
-        Self { _stream, playing }
+        Self {
+            _stream: stream_opt,
+            playing,
+        }
     }
 
     pub fn set_playing(self: &mut Self, play: bool) {
@@ -344,7 +360,7 @@ impl VirtualMachine {
                 0x00EE => Opcode::Return,
                 _ => {
                     println!(
-                        "Unknown instruction 0x{:04X} at PC 0x{:03X}.",
+                        "Unknown instruction 0x{:04X} at 0x{:03X}.",
                         instruction,
                         self.program_counter - 2
                     );
@@ -421,7 +437,7 @@ impl VirtualMachine {
                 ),
                 _ => {
                     println!(
-                        "Unknown instruction 0x{:04X} at PC 0x{:03X}.",
+                        "Unknown instruction 0x{:04X} at 0x{:03X}.",
                         instruction,
                         self.program_counter - 2
                     );
@@ -457,7 +473,7 @@ impl VirtualMachine {
                 0xA1 => Opcode::SkipNotKey(((instruction & 0x0F00) >> 8) as u8),
                 _ => {
                     println!(
-                        "Unknown instruction 0x{:04X} at PC 0x{:03X}.",
+                        "Unknown instruction 0x{:04X} at 0x{:03X}.",
                         instruction,
                         self.program_counter - 2
                     );
@@ -476,7 +492,7 @@ impl VirtualMachine {
                 0x65 => Opcode::LoadRegs(((instruction & 0x0F00) >> 8) as u8),
                 _ => {
                     println!(
-                        "Unknown instruction 0x{:04X} at PC 0x{:03X}.",
+                        "Unknown instruction 0x{:04X} at 0x{:03X}.",
                         instruction,
                         self.program_counter - 2
                     );
@@ -505,7 +521,7 @@ impl VirtualMachine {
             Opcode::Call(address) => {
                 if self.stack_pointer >= 16 {
                     println!(
-                        "Call stack overflows while attempting to push return address 0x{:03X}.\nCall Stack (with Stack Pointer at 0xF, Old -> New Order):\n{}",
+                        "Call stack overflows while attempting to push return address 0x{:03X}.\nCall Stack (with Stack Pointer at 0xF, most recent call last):\n{}",
                         self.program_counter,
                         self.stack
                             .iter()

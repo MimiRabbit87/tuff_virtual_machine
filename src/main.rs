@@ -4,6 +4,7 @@ mod memory;
 mod random;
 mod screen;
 mod spin_sleep;
+mod stderr_silencer;
 mod virtual_machine;
 
 use std::{
@@ -11,13 +12,12 @@ use std::{
     io::Write,
     path::Path,
     print, println,
-    str::FromStr,
     sync::{Arc, Mutex},
     thread::spawn,
     time::{Duration, Instant},
 };
 
-use minifb::{Icon, Key};
+use minifb::Key;
 
 use crate::{screen::Screen, spin_sleep::sleep};
 
@@ -46,7 +46,8 @@ impl Arguments {
         let mut show_information: bool = false;
         let mut no_vertical_synchronization: bool = false;
 
-        // bit0: should_parse_executable, bit1: is_parsed_executable, bit2: should_parse_freq, bit3: is_parsed_freq
+        // bit0: should_parse_executable, bit1: is_parsed_executable
+        // bit2: should_parse_frequency, bit3: is_parsed_frequency
         let mut temp: u8 = 0;
 
         macro_rules! error_exit {
@@ -88,7 +89,7 @@ impl Arguments {
                 is_help = true;
                 break;
             } else if argument == "--version" {
-                println!("\x1b[0mTuff Virtual Machine 0.1.0");
+                println!("\x1b[0mTuff Virtual Machine 0.1.1");
                 should_exit = true;
                 is_help = true;
                 break;
@@ -168,7 +169,7 @@ impl Arguments {
                             break;
                         }
                         'V' => {
-                            println!("\x1b[0mTuff Virtual Machine 0.1.0\x1b[0m");
+                            println!("\x1b[0mTuff Virtual Machine 0.1.1\x1b[0m");
                             should_exit = true;
                             is_help = true;
                             break;
@@ -310,10 +311,10 @@ fn main() {
 
     let mut information_head: &str = "";
     if show_information {
-        information_head = "\r\x1b[KWelcome to Tuff Virtual Machine!\n";
+        information_head = "\r\x1b[KWelcome to Tuff Virtual Machine! Press Escape to quit.\n";
     } else {
         println!(
-            "\r\x1b[KWelcome to Tuff Virtual Machine!\n{}{}",
+            "\r\x1b[KWelcome to Tuff Virtual Machine!\nPress Escape to quit.\n{}{}",
             if no_vertical_synchronization
                 && (440 > running_at_frequency_hz || running_at_frequency_hz > 520)
             {
@@ -390,7 +391,7 @@ fn main() {
 
             if show_information {
                 let information: String = format!(
-                    "\x1b[1;1H{}\x1b[KReal Main Frequency: {}Hz\n\r\x1b[KRegisters (v0x0-v0xF):\n{}\n\r\x1b[KCall Stack (with Stack Pointer at 0x{:01X}, Old -> New Order):\n{}\n\r\x1b[KI = 0x{:03X}, PC = 0x{:03X}, DT = 0x{:02X}, ST = 0x{:02X}\n\x1b[J",
+                    "\x1b[1;1H{}\x1b[KReal Main Frequency: {}Hz\n\r\x1b[KRegisters (v0x0-v0xF):\n\r\x1b[K{}\n\r\x1b[KCall Stack (with Stack Pointer at 0x{:01X}, most recent call last):\n\r\x1b[K{}\n\r\x1b[KI = 0x{:03X}, PC = 0x{:03X}, DT = 0x{:02X}, ST = 0x{:02X}\n\x1b[J",
                     information_head,
                     real_frequency_hz,
                     virtual_machine_status_snapshot
@@ -416,8 +417,11 @@ fn main() {
         }
     });
 
-    window.set_icon(Icon::from_str("assets/icon.ico").unwrap());
     while window.is_open() {
+        if window.is_key_down(Key::Escape) {
+            break;
+        };
+
         if let Ok(mut keys) = current_key.lock() {
             keys[0x0] = window.is_key_down(Key::X);
             keys[0x1] = window.is_key_down(Key::Key1);
