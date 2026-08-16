@@ -158,7 +158,7 @@ impl AudioPlayer {
                                     }
                                 };
                             },
-                            |err| println!("audio error: {}", err),
+                            |error| println!("audio error: {}", error),
                             None,
                         )
                         .unwrap();

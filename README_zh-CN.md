@@ -1,7 +1,7 @@
 [Here's the English version](https://github.com/MimiRabbit87/tuff_virtual_machine/blob/master/README.md)
 # 凝灰岩虚拟机
 
-凝灰岩虚拟机是 CHIP-8 解释器的一个 Rust 实现。
+凝灰岩虚拟机是一个用 Rust 实现的 CHIP-8 解释器。
 
 ## 什么是凝灰岩？
 
@@ -69,7 +69,7 @@ cargo build --release
 |----|----|
 |`-r, --run <PATH>`|要运行的 CHIP-8 ROM 文件路径|
 |`-f, --frequency <HZ>`|设置 CPU 频率（指令/秒），默认 `500`。输入 `0` 来取消频率限制（不稳定）|
-|`-i, --with-debug-information`|在终端上显示调试信息（寄存器、调用栈、计时器等|
+|`-i, --with-debug-information`|在终端上显示调试信息（寄存器、调用栈、计时器等）|
 |`--no-vertical-synchronization`|禁用 `60Hz` 的帧同步（即禁用模拟垂直同步，在高 CPU 频率下可能会导致渲染过快）|
 |`-h, --help`|打印帮助信息（用 `--help` 查看详细信息）|
 |`-V, --version`|打印版本信息|
@@ -82,7 +82,7 @@ cargo build --release
 
 ## 测试
 
-凝灰岩虚拟机通过了以下 [Timendus CHIP-8 测试集](https://github.com/Timendus/chip8-test-suite)：
+凝灰岩虚拟机通过了 [Timendus CHIP-8 测试集](https://github.com/Timendus/chip8-test-suite)：
 
  - 1-chip8-logo.ch8
 
